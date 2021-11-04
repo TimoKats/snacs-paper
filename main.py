@@ -41,9 +41,22 @@ def count_intersects(edges):
                     intersects += 1
     return int(intersects/2)
 
-if __name__ == '__main__':
-    file = open('json/small_forceatlas.json', )
+
+# making definition of opening file and calculating edges
+def number_of_edge_crossings(method, file):
+    file = open(file)
     data = json.load(file)
     edges = get_edges(data)
     intersects = count_intersects(edges)
-    print('the amount of edge crossings equals: ', intersects)
+    print("method used:", method, 'The amount of edge crossings equals:', intersects)
+
+
+# main with the files used (could be better)
+if __name__ == '__main__':
+    files = {"small_forceatlas": 'json/small_forceatlas.json',
+            "small_random": 'json/small_random.json',
+            "small_reingold": 'json/small_reingold.json',
+            "small_yifanhu": 'json/small_yifanhu.json'}
+
+    for i in files:
+        number_of_edge_crossings(i, files[i])
