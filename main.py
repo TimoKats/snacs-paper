@@ -1,20 +1,35 @@
 import json
 import os
 
+def export_csv(size_method, crosses, bends):
+    output = open('data.csv', 'a', encoding='utf-8')
+    size = size_method.split('_')[0]
+    method = size_method.split('_')[1]
+    output.write(size + ',' + method + ',' + str(crosses) + ',' + str(bends) + '\n')
+    output.close()
+
+##stackoverflow#https://stackoverflow.com/questions/3838329/how-can-i-check-if-two-segments-intersect###################
 
 class point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
-
-def ccw(A, B, C):  # stackoverflow https://stackoverflow.com/questions/3838329/how-can-i-check-if-two-segments-intersect
+def ccw(A, B, C):
     return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x)
-
 
 def intersect(A, B, C, D):
     return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
 
+########################################################################################################################
+
+def get_nodes(data):
+    nodes, node_temp = [], {}
+    for node in data['nodes']:
+        node_temp['x'] = node['x']
+        node_temp['y'] = node['y']
+        nodes.append(node_temp)
+    return nodes
 
 def get_edges(data):
     edges, edge_temp = [], {}
@@ -33,7 +48,6 @@ def get_edges(data):
         edges.append(edge_temp)
     return edges
 
-
 def count_intersects(edges):
     intersects = 0
     for edge1 in edges:
@@ -45,27 +59,55 @@ def count_intersects(edges):
                 D = point(edge2['x2'], edge2['y2'])
                 if intersect(A, B, C, D):
                     intersects += 1
-    return int(intersects / 2)
+    return int(intersects / 2) # avoid double counts
 
+def count_bends(nodes, edges):
+    bends = 0
+    for edge in edges:
+        A = point(edge['x1'], edge['y1'])
+        B = point(edge['x2'], edge['y2'])
+        for node in nodes:  # make a small area to create the node
+            C = point(node['x'], node['y'])
+            D = point(node['x'] + 1, node['y'] + 1)
+            if intersect(A, B, C, D):
+                bends += 1
+            C = point(node['x'], node['y'])
+            D = point(node['x'] + 1, node['y'] - 1)
+            if intersect(A, B, C, D):
+                bends += 1
+            C = point(node['x'], node['y'])
+            D = point(node['x'] - 1, node['y'] + 1)
+            if intersect(A, B, C, D):
+                bends += 1
+            C = point(node['x'], node['y'])
+            D = point(node['x'] - 1, node['y'] - 1)
+            if intersect(A, B, C, D):
+                bends += 1
+    return int(bends / 2) # avoid double counts
 
-# making definition of opening file and calculating edges
-def number_of_edge_crossings(method, file):
+def number_of_edge_crossings(file):
     file = open(file)
     data = json.load(file)
     edges = get_edges(data)
     intersects = count_intersects(edges)
-    print("method used:", method, 'The amount of edge crossings equals:', intersects)
+    return intersects
 
+def number_of_edge_bends(file):
+    file = open(file)
+    data = json.load(file)
+    edges = get_edges(data)
+    nodes = get_nodes(data)
+    bends = count_bends(nodes, edges)
+    return bends
 
-# main with the files used
 if __name__ == '__main__':
 
     files = {}
-    # if a file is in the folder json we will get the number of edgecrossings
     for filename in os.listdir("json"):
         name = filename[:-5]
         location = "json/" + filename
         files[name] = location
 
+    export_csv('file_method', '#edge crossings', '#edge bends')
     for i in files:
-        number_of_edge_crossings(i, files[i])
+        export_csv(i, number_of_edge_crossings(files[i]), number_of_edge_bends(files[i]))
