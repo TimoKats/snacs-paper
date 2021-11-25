@@ -1,2 +1,11 @@
-# snacs-paper
-Exporteer een gephi graph als JSON (installeer de json plugin in gephi hiervoor) en stop hem in de map /data. De code zal dan het aantal edgecrossings weergeven.
+# Social Network Analysis Group 40 Code
+
+#### Adding data
+Export a Gephi graph as JSON and add it to the JSON directory
+
+#### Running code
+- Make sure the required data is availible in directory '/json'
+- Run the main.py file
+- This will output a file data.csv with the results
+
+Made by Timo Kats and Ricardo Schaaf
